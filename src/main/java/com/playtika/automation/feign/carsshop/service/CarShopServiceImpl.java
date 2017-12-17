@@ -5,19 +5,12 @@ import com.playtika.automation.feign.carsshop.model.Car;
 import com.playtika.automation.feign.carsshop.model.CarId;
 import com.playtika.automation.feign.carsshop.model.CarSaleDetails;
 import com.playtika.automation.feign.carsshop.model.SaleInfo;
-import feign.Feign;
-import feign.gson.GsonDecoder;
-import feign.gson.GsonEncoder;
 
 import java.util.List;
 
 public class CarShopServiceImpl implements CarShopService{
-    private static final String URI_CARS = "http://localhost:8082";
 
-    private CarsShopFeign carClient = Feign.builder()
-            .encoder(new GsonEncoder())
-            .decoder(new GsonDecoder())
-            .target(CarsShopFeign.class, URI_CARS);
+    private CarsShopFeign carClient;
 
     @Override
     public List<CarSaleDetails> getAllCars() {
