@@ -2,13 +2,16 @@ package com.playtika.automation.feign.carsshop.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Value;
 
+/**
+ * Created by emuravjova on 12/19/2017.
+ */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CarSaleDetails {
+@AllArgsConstructor
+public class CarReport {
     private Car car;
-    private SaleInfo saleInfo;
+    private String message;
 }

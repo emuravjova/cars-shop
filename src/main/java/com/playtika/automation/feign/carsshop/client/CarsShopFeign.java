@@ -2,31 +2,17 @@ package com.playtika.automation.feign.carsshop.client;
 
 import com.playtika.automation.feign.carsshop.model.Car;
 import com.playtika.automation.feign.carsshop.model.CarId;
-import com.playtika.automation.feign.carsshop.model.CarSaleDetails;
-import com.playtika.automation.feign.carsshop.model.SaleInfo;
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
+import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
-@Headers("Accept: application/json")
+@FeignClient(name = "car-shop", url = "http://localhost:8082")
 public interface CarsShopFeign {
 
-    @Headers("Content-Type: application/json")
-    @RequestLine("GET /cars")
-    public List<CarSaleDetails> getAllCars();
-
-    @Headers("Content-Type: application/json")
-    @RequestLine("GET /cars/{id}")
-    public SaleInfo getCarDetailsById(@Param("id") Long id);
-
-    @RequestLine("DELETE /cars/{id}")
-    public void deleteCarById(@Param("id") Long id);
-
-    @Headers("Content-Type: application/json")
-    @RequestLine("POST /cars/?price={price}&contacts={contacts}")
-    public CarId addCar(Car car,
-                        @Param("price") int price,
-                        @Param("contacts") String contacts);
+    @RequestMapping(method = RequestMethod.POST, value = "/cars")
+    CarId addCar(@RequestBody Car car,
+                        @RequestParam("price") int price,
+                        @RequestParam("contacts") String contacts);
 }
