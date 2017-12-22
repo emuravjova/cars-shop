@@ -1,5 +1,6 @@
 package com.playtika.automation.feign.carsshop.web;
 
+import com.playtika.automation.feign.carsshop.exception.FileProblemException;
 import com.playtika.automation.feign.carsshop.model.Car;
 import com.playtika.automation.feign.carsshop.model.CarReport;
 import com.playtika.automation.feign.carsshop.model.CarSaleDetails;
@@ -7,6 +8,7 @@ import com.playtika.automation.feign.carsshop.model.SaleInfo;
 import com.playtika.automation.feign.carsshop.service.CarShopService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -28,33 +30,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CarsShopController {
 
-    private final CarShopService carService;
-    private static final String SEPARATOR = ",";
+    @Autowired
+    private CarShopService carService;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CarReport> addCar(@RequestBody String fileName) {
-        List<CarSaleDetails> carsToAdd = new ArrayList<>();
-
-        try (BufferedReader br = Files.newBufferedReader(Paths.get(fileName))) {
-            carsToAdd = br.lines()
-                    .map(CarsShopController::mapToCarSaleDetails)
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new MyEx;
-        }
-
-        return carService.addCar(carsToAdd);
-    }
-
-    private static CarSaleDetails mapToCarSaleDetails (String line) {
-        String[] p = line.split(SEPARATOR);
-        return new CarSaleDetails(new Car(p[0],p[1], Integer.parseInt(p[2]),p[3]), new SaleInfo(Integer.parseInt(p[4]),p[5]));
+    public List<CarReport> addCar(@RequestBody String fileName) throws FileProblemException {
+        return carService.addCar(fileName);
     }
 
     @ExceptionHandler
-    @ResponseStatus(value= HttpStatus.BAD_REQUEST)
-    public String handleMyEx(MyEx e){
-        log.error("ljdfsg {}", e);
-        return "jfgvsjvhg";
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public String handleMyEx(FileProblemException e) {
+        log.error("Error while file handling {}", e);
+        return e.getMessage();
     }
 }

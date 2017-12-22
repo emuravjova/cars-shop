@@ -13,6 +13,6 @@ public interface CarsShopFeign {
 
     @RequestMapping(method = RequestMethod.POST, value = "/cars")
     CarId addCar(@RequestBody Car car,
-                        @RequestParam("price") int price,
-                        @RequestParam("contacts") String contacts);
+                 @RequestParam("price") int price,
+                 @RequestParam("contacts") String contacts);
 }

@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableFeignClients
 public class CarsShopApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CarsShopApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(CarsShopApplication.class, args);
+    }
 }
