@@ -17,7 +17,7 @@ import static io.restassured.RestAssured.given;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class CarShopControllerSystemTest {
-    private final static String NUMBER = "AS123";
+    private final static String NUMBER = "ATT123";
     private final static String BRAND = "BMW";
     private final static Integer YEAR = 2007;
     private final static String COLOR = "blue";
@@ -26,7 +26,7 @@ public class CarShopControllerSystemTest {
     @Test
     public void shouldGetCars() throws Exception {
         JsonPath jsonResponse = given()
-                .body(new File("src/main/resources/cars/CarsToAddTest.csv"))
+                .body("src/main/resources/cars/CarsToAddTest.csv")
                 .when().post("/cars").jsonPath();
         assert (jsonResponse.get("car.number").equals(NUMBER));
         assert (jsonResponse.get("car.brand").equals(BRAND));
