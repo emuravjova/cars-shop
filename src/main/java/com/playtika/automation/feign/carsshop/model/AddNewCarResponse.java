@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @Data
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class CarSaleDetails {
-    Car car;
-    SaleInfo saleInfo;
+public class AddNewCarResponse {
+    long id;
 }

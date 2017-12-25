@@ -1,20 +1,16 @@
 package com.playtika.automation.feign.carsshop.service;
 
-import com.playtika.automation.feign.carsshop.client.CarsShopFeign;
-import com.playtika.automation.feign.carsshop.exception.FileProblemException;
+import com.playtika.automation.feign.carsshop.exception.InvalidFileContent;
+import com.playtika.automation.feign.carsshop.exception.InvalidFileException;
 import com.playtika.automation.feign.carsshop.facade.CarShopFacade;
 import com.playtika.automation.feign.carsshop.model.*;
-import com.playtika.automation.feign.carsshop.web.CarsShopController;
-import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,31 +18,52 @@ import java.util.stream.Collectors;
 @Service
 public class CarShopServiceImpl implements CarShopService {
 
-    @Autowired
     private CarShopFacade carsShopFacade;
 
     private static final String SEPARATOR = ",";
 
-    @Override
-    public List<CarReport> addCar(String fileName) throws FileProblemException {
-        List<CarSaleDetails> carsToAdd;
+    public CarShopServiceImpl(CarShopFacade carsShopFacade) {
+        this.carsShopFacade = carsShopFacade;
+    }
 
+    @Override
+    public List<CarReport> addCar(String fileName) {
+        return readCarDetailsFromFile(fileName).stream()
+                .map(carsShopFacade::getCarReport)
+                .collect(Collectors.toList());
+    }
+
+    private List<CarSaleDetails> readCarDetailsFromFile(String fileName) {
         try (BufferedReader br = Files.newBufferedReader(Paths.get(fileName))) {
-            carsToAdd = br.lines()
+            return br.lines()
                     .map(this::mapToCarSaleDetails)
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new FileProblemException("Can not handle file: " + fileName);
+            throw new InvalidFileException("Can not handle file: " + fileName);
         }
-        List<CarReport> carReports;
-        carReports = carsToAdd.stream()
-                .map(carsShopFacade::getCarReport)
-                .collect(Collectors.toList());
-        return carReports;
     }
 
     private CarSaleDetails mapToCarSaleDetails(String line) {
         String[] p = line.split(SEPARATOR);
-        return new CarSaleDetails(new Car(p[0], p[1], Integer.parseInt(p[2]), p[3]), new SaleInfo(Integer.parseInt(p[4]), p[5]));
+        if (p.length < 6) {
+            throw new InvalidFileContent("Incorrect file content in line: " + line);
+        }
+        Car car = getCar(p);
+        SaleInfo saleInfo = getSaleInfo(p);
+        return new CarSaleDetails(car, saleInfo);
+    }
+
+    private Car getCar(String[] p) {
+        String number = p[0];
+        String brand = p[1];
+        int year = Integer.parseInt(p[2]);
+        String color = p[3];
+        return new Car(number, brand, year, color);
+    }
+
+    private SaleInfo getSaleInfo(String[] p) {
+        int price = Integer.parseInt(p[4]);
+        String contacts = p[5];
+        return new SaleInfo(price, contacts);
     }
 }

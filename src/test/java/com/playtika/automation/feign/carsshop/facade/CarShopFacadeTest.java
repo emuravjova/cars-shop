@@ -1,19 +1,18 @@
 package com.playtika.automation.feign.carsshop.facade;
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.playtika.automation.feign.carsshop.client.CarsShopFeign;
-import com.playtika.automation.feign.carsshop.model.Car;
-import com.playtika.automation.feign.carsshop.model.CarReport;
-import com.playtika.automation.feign.carsshop.model.CarSaleDetails;
-import com.playtika.automation.feign.carsshop.model.SaleInfo;
+import com.playtika.automation.feign.carsshop.model.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import wiremock.com.fasterxml.jackson.core.JsonProcessingException;
+import wiremock.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
@@ -30,58 +29,64 @@ public class CarShopFacadeTest {
     @Autowired
     private CarShopFacade facade;
 
-//    @Autowired
-//    private CarsShopFeign client;
-
     @Rule
     public WireMockRule wm = new WireMockRule(options().port(8082).notifier(new Slf4jNotifier(true)));
 
+    private final static String NUMBER = "AS123";
+    private final static String BRAND = "BMW";
+    private final static Integer YEAR = 2007;
+    private final static String COLOR = "blue";
+    private final static Integer PRICE = 25000;
+    private final static String CONTACTS = "0982345678";
+    private final ObjectMapper carMapper = new ObjectMapper();
+
     @Test
     public void shouldReturnReportForAddedCar() throws Exception {
-        Car car = new Car("AEW123", "BMW", 2016, "red");
-
-        wm.stubFor(post(urlPathEqualTo("/cars"))
-                .withQueryParam("price", WireMock.equalTo("2000"))
-                .withQueryParam("contacts", WireMock.equalTo("097876545"))
-                .withRequestBody(equalToJson("{\"number\":\"AEW123\",\"brand\":\"BMW\",\"year\":2016,\"color\":\"red\"}"))
+        Car car = new Car(NUMBER, BRAND, YEAR, COLOR);
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(PRICE,CONTACTS));
+        wm.stubFor(doRequestToAddCar(car)
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
                         .withBody("{\"id\":1}")));
 
-        CarReport expectedReport = new CarReport(car, "Car(number=AEW123, brand=BMW, year=2016, color=red)has been added for sale with id=1");
-        CarReport actualReport = facade.getCarReport(new CarSaleDetails(car, new SaleInfo(2000, "097876545")));
+        CarReport expectedReport = new CarReport(carWithDetails, ReportStatus.ADDED);
+        CarReport actualReport = facade.getCarReport(carWithDetails);
         assertThat(actualReport, equalTo(expectedReport));
     }
 
     @Test
     public void shouldReturnReportForCarThatAlreadyOnSale() throws Exception {
-        Car car = new Car("AEW123", "BMW", 2016, "red");
-
-        wm.stubFor(post(urlPathEqualTo("/cars"))
-                .withQueryParam("price", WireMock.equalTo("2000"))
-                .withQueryParam("contacts", WireMock.equalTo("097876545"))
-                .withRequestBody(equalToJson("{\"number\":\"AEW123\",\"brand\":\"BMW\",\"year\":2016,\"color\":\"red\"}"))
+        Car car = new Car(NUMBER, BRAND, YEAR, COLOR);
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(PRICE,CONTACTS));
+        wm.stubFor(doRequestToAddCar(car)
                 .willReturn(aResponse()
                         .withStatus(500)));
 
-        CarReport expectedReport = new CarReport(car, "Car has not been added due to such car is already on sale");
-        CarReport actualReport = facade.getCarReport(new CarSaleDetails(car, new SaleInfo(2000, "097876545")));
+        CarReport expectedReport = new CarReport(carWithDetails, ReportStatus.ALREADY_ON_SALE);
+        CarReport actualReport = facade.getCarReport(carWithDetails);
         assertThat(actualReport, equalTo(expectedReport));
     }
 
     @Test
     public void shouldReturnReportForCarWithMissingDetails() throws Exception {
-        Car car = new Car("AEW123", null, 2016, "red");
-
+        Car car = new Car(NUMBER, null, YEAR, COLOR);
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(PRICE,null));
         wm.stubFor(post(urlPathEqualTo("/cars"))
-                .withQueryParam("price", WireMock.equalTo("2000"))
-                .withRequestBody(equalToJson("{\"number\":\"AEW123\",\"brand\":null,\"year\":2016,\"color\":\"red\"}"))
+                .withQueryParam("price", WireMock.equalTo(String.valueOf(PRICE)))
+                .withRequestBody(equalToJson(carMapper.writeValueAsString(car)))
                 .willReturn(aResponse()
                         .withStatus(400)));
 
-        CarReport expectedReport = new CarReport(car, "Car has not been added due to not all required parameters was received");
-        CarReport actualReport = facade.getCarReport(new CarSaleDetails(car, new SaleInfo(2000, null)));
+        CarReport expectedReport = new CarReport(carWithDetails, ReportStatus.NOT_ALL_PARAMETERS);
+        CarReport actualReport = facade.getCarReport(carWithDetails);
         assertThat(actualReport, equalTo(expectedReport));
+    }
+
+    private MappingBuilder doRequestToAddCar(Car car) throws JsonProcessingException {
+        return post(urlPathEqualTo("/cars"))
+                .withQueryParam("price", WireMock.equalTo(String.valueOf(PRICE)))
+                .withQueryParam("contacts", WireMock.equalTo(CONTACTS))
+                .withRequestBody(equalToJson(carMapper.writeValueAsString(car)));
     }
 }

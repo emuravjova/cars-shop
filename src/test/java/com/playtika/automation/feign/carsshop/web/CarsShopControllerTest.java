@@ -1,8 +1,7 @@
 package com.playtika.automation.feign.carsshop.web;
 
-import com.playtika.automation.feign.carsshop.exception.FileProblemException;
-import com.playtika.automation.feign.carsshop.model.Car;
-import com.playtika.automation.feign.carsshop.model.CarReport;
+import com.playtika.automation.feign.carsshop.exception.InvalidFileException;
+import com.playtika.automation.feign.carsshop.model.*;
 import com.playtika.automation.feign.carsshop.service.CarShopService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(CarsShopController.class)
-public class CarsShopControllerIntegrationTest {
+public class CarsShopControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,28 +35,31 @@ public class CarsShopControllerIntegrationTest {
     private final static String BRAND = "BMW";
     private final static Integer YEAR = 2007;
     private final static String COLOR = "blue";
-    private final static String MESSAGE = "Car(number=AEW123, brand=BMW, year=2016, color=red)has been added for sale with id=1";
-    private final static String FILE = "src/main/resources/cars/CarsToAdd.csv";
+    private final static String FILE = "pathToFile";
+    private final static Integer PRICE = 25000;
+    private final static String CONTACTS = "Ron 0982345678";
 
     @Test
     public void shouldReturn200withReportOnAddCarsForSale() throws Exception {
-        Car car = new Car(NUMBER, BRAND, YEAR, COLOR);
-        List<CarReport> expectedReport = Collections.singletonList(new CarReport(car, MESSAGE));
+        CarSaleDetails carWithDetails = new CarSaleDetails(new Car(NUMBER, BRAND, YEAR, COLOR), new SaleInfo(PRICE,CONTACTS));
+        List<CarReport> expectedReport = Collections.singletonList(new CarReport(carWithDetails, ReportStatus.ADDED));
         when(carService.addCar(FILE)).thenReturn(expectedReport);
         mockMvc.perform(post("/cars")
                 .content(FILE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$[0].car.number").value(NUMBER))
-                .andExpect(jsonPath("$[0].car.brand").value(BRAND))
-                .andExpect(jsonPath("$[0].car.year").value(YEAR))
-                .andExpect(jsonPath("$[0].car.color").value(COLOR))
-                .andExpect(jsonPath("$[0].message").value(MESSAGE));
+                .andExpect(jsonPath("$[0].carDetails.car.number").value(NUMBER))
+                .andExpect(jsonPath("$[0].carDetails.car.brand").value(BRAND))
+                .andExpect(jsonPath("$[0].carDetails.car.year").value(YEAR))
+                .andExpect(jsonPath("$[0].carDetails.car.color").value(COLOR))
+                .andExpect(jsonPath("$[0].carDetails.saleInfo.price").value(PRICE))
+                .andExpect(jsonPath("$[0].carDetails.saleInfo.contacts").value(CONTACTS))
+                .andExpect(jsonPath("$[0].status").value("ADDED"));
     }
 
     @Test
     public void shouldReturn400BadRequestOnAddCarsWhenFileFotFound() throws Exception {
-        when(carService.addCar("")).thenThrow(FileProblemException.class);
+        when(carService.addCar("")).thenThrow(InvalidFileException.class);
         mockMvc.perform(post("/cars")
                 .content(""))
                 .andExpect(status().isBadRequest());

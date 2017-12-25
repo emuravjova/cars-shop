@@ -1,17 +1,18 @@
 package com.playtika.automation.feign.carsshop.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Value;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Created by emuravjova on 12/19/2017.
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CarReport {
-    private Car car;
-    private String message;
+    CarSaleDetails carDetails;
+    @ApiModelProperty(notes = "Oparation status", required = true, example = "ADDED")
+    ReportStatus status;
 }

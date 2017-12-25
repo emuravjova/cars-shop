@@ -5,8 +5,8 @@ import java.io.IOException;
 /**
  * Created by emuravjova on 12/22/2017.
  */
-public class FileProblemException extends IOException{
-    public FileProblemException(String message) {
+public class InvalidFileException extends RuntimeException{
+    public InvalidFileException(String message) {
         super(message);
     }
 }

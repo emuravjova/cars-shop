@@ -1,13 +1,16 @@
 package com.playtika.automation.feign.carsshop.model;
 
-import lombok.AllArgsConstructor;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Value;
 
 @Value
-@AllArgsConstructor
 public class Car {
-    private String number;
-    private String brand;
-    private Integer year;
-    private String color;
+    @ApiModelProperty(notes = "Car plate number", required = true, example = "QW123")
+    String number;
+    @ApiModelProperty(notes = "Car brand", required = true, example = "BMW")
+    String brand;
+    @ApiModelProperty(notes = "Car manufactured year", required = true, example = "2017")
+    Integer year;
+    @ApiModelProperty(notes = "Car color", required = true, example = "green")
+    String color;
 }

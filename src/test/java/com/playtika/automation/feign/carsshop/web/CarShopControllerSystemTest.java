@@ -1,6 +1,7 @@
 package com.playtika.automation.feign.carsshop.web;
 
 import com.playtika.automation.feign.carsshop.model.Car;
+import com.playtika.automation.feign.carsshop.model.ReportStatus;
 import io.restassured.path.json.JsonPath;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.File;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * Created by emuravjova on 12/22/2017.
@@ -17,21 +19,28 @@ import static io.restassured.RestAssured.given;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class CarShopControllerSystemTest {
-    private final static String NUMBER = "ATT123";
+    private final static String NUMBER = "FG123";
     private final static String BRAND = "BMW";
-    private final static Integer YEAR = 2007;
-    private final static String COLOR = "blue";
-    private final static String MESSAGE = "Car(number=AEW123, brand=BMW, year=2016, color=red)has been added for sale with id=1";
+    private final static Integer YEAR = 2015;
+    private final static String COLOR = "green";
+    private final static Integer PRICE = 15000;
+    private final static String CONTACTS = "09689638521";
 
     @Test
     public void shouldGetCars() throws Exception {
-        JsonPath jsonResponse = given()
-                .body("src/main/resources/cars/CarsToAddTest.csv")
-                .when().post("/cars").jsonPath();
-        assert (jsonResponse.get("car.number").equals(NUMBER));
-        assert (jsonResponse.get("car.brand").equals(BRAND));
-        assert (jsonResponse.get("car.year").equals(YEAR));
-        assert (jsonResponse.get("car.color").equals(COLOR));
-        assert (jsonResponse.get("message").equals(MESSAGE));
+        given()
+                .body("src/test/resources/files/systemTest.csv")
+                .when()
+                .log().all()
+                .post("/cars")
+                .then()
+                .log().all()
+                .body("[0].carDetails.car.number", equalTo(NUMBER))
+                .body("[0].carDetails.car.brand", equalTo(BRAND))
+                .body("[0].carDetails.car.year", equalTo(YEAR))
+                .body("[0].carDetails.car.color", equalTo(COLOR))
+                .body("[0].carDetails.saleInfo.price", equalTo(PRICE))
+                .body("[0].carDetails.saleInfo.contacts", equalTo(CONTACTS))
+                .body("[0].status", equalTo("ADDED"));
     }
 }
