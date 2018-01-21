@@ -66,6 +66,6 @@ public class CarShopServiceImplTest {
         Car car = new Car("DS123", "BMW",2015, "green");
         SaleInfo carDetails = new SaleInfo(15000, "09689638521");
         CarSaleDetails carWithDetails = new CarSaleDetails(car,carDetails);
-        return new CarReport(carWithDetails, ReportStatus.ADDED);
+        return new CarReport(1L, carWithDetails, ReportStatus.ADDED);
     }
 }

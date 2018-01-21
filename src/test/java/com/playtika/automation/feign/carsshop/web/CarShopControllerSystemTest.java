@@ -3,6 +3,8 @@ package com.playtika.automation.feign.carsshop.web;
 import com.playtika.automation.feign.carsshop.model.Car;
 import com.playtika.automation.feign.carsshop.model.ReportStatus;
 import io.restassured.path.json.JsonPath;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +37,7 @@ public class CarShopControllerSystemTest {
                 .post("/cars")
                 .then()
                 .log().all()
+                .body("[0].carId", Matchers.greaterThan(0))
                 .body("[0].carDetails.car.number", equalTo(NUMBER))
                 .body("[0].carDetails.car.brand", equalTo(BRAND))
                 .body("[0].carDetails.car.year", equalTo(YEAR))

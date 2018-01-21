@@ -50,7 +50,7 @@ public class CarShopFacadeTest {
                         .withHeader("Content-Type", "application/json;charset=UTF-8")
                         .withBody("{\"id\":1}")));
 
-        CarReport expectedReport = new CarReport(carWithDetails, ReportStatus.ADDED);
+        CarReport expectedReport = new CarReport(1L, carWithDetails, ReportStatus.ADDED);
         CarReport actualReport = facade.getCarReport(carWithDetails);
         assertThat(actualReport, equalTo(expectedReport));
     }
@@ -63,7 +63,7 @@ public class CarShopFacadeTest {
                 .willReturn(aResponse()
                         .withStatus(500)));
 
-        CarReport expectedReport = new CarReport(carWithDetails, ReportStatus.ALREADY_ON_SALE);
+        CarReport expectedReport = new CarReport(0L, carWithDetails, ReportStatus.ALREADY_ON_SALE);
         CarReport actualReport = facade.getCarReport(carWithDetails);
         assertThat(actualReport, equalTo(expectedReport));
     }
@@ -78,7 +78,7 @@ public class CarShopFacadeTest {
                 .willReturn(aResponse()
                         .withStatus(400)));
 
-        CarReport expectedReport = new CarReport(carWithDetails, ReportStatus.NOT_ALL_PARAMETERS);
+        CarReport expectedReport = new CarReport(0L, carWithDetails, ReportStatus.NOT_ALL_PARAMETERS);
         CarReport actualReport = facade.getCarReport(carWithDetails);
         assertThat(actualReport, equalTo(expectedReport));
     }

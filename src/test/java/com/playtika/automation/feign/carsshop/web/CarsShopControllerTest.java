@@ -42,12 +42,13 @@ public class CarsShopControllerTest {
     @Test
     public void shouldReturn200withReportOnAddCarsForSale() throws Exception {
         CarSaleDetails carWithDetails = new CarSaleDetails(new Car(NUMBER, BRAND, YEAR, COLOR), new SaleInfo(PRICE,CONTACTS));
-        List<CarReport> expectedReport = Collections.singletonList(new CarReport(carWithDetails, ReportStatus.ADDED));
+        List<CarReport> expectedReport = Collections.singletonList(new CarReport(1L,carWithDetails, ReportStatus.ADDED));
         when(carService.addCar(FILE)).thenReturn(expectedReport);
         mockMvc.perform(post("/cars")
                 .content(FILE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$[0].carId").value(1L))
                 .andExpect(jsonPath("$[0].carDetails.car.number").value(NUMBER))
                 .andExpect(jsonPath("$[0].carDetails.car.brand").value(BRAND))
                 .andExpect(jsonPath("$[0].carDetails.car.year").value(YEAR))

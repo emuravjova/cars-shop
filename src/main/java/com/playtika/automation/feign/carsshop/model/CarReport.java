@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CarReport {
+    Long carId;
     CarSaleDetails carDetails;
     @ApiModelProperty(notes = "Oparation status", required = true, example = "ADDED")
     ReportStatus status;

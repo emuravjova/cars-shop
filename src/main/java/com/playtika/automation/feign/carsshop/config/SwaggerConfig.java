@@ -22,7 +22,7 @@ public class SwaggerConfig {
                 .globalResponseMessage(RequestMethod.POST, ImmutableList.of(new ResponseMessage(200, "OK",null, null, null)))
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.playtika.automation.feign.carsshop.web"))
-                .paths(regex("/cars"))
+//                .paths(regex("/cars"))
                 .build()
                 .apiInfo(metaData());
     }
