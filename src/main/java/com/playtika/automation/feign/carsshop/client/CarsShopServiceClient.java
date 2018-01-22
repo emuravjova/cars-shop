@@ -1,20 +1,17 @@
 package com.playtika.automation.feign.carsshop.client;
 
-import com.playtika.automation.feign.carsshop.model.Car;
 import com.playtika.automation.feign.carsshop.model.AddNewCarResponse;
+import com.playtika.automation.feign.carsshop.model.Car;
 import com.playtika.automation.feign.carsshop.model.Customer;
 import com.playtika.automation.feign.carsshop.model.DealInfo;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "car-shop")
 public interface CarsShopServiceClient {

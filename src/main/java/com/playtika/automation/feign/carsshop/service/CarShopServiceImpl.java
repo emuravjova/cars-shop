@@ -18,19 +18,39 @@ import java.util.stream.Collectors;
 @Service
 public class CarShopServiceImpl implements CarShopService {
 
-    private CarShopFacade carsShopFacade;
-
     private static final String SEPARATOR = ",";
+
+    private CarShopFacade carsShopFacade;
 
     public CarShopServiceImpl(CarShopFacade carsShopFacade) {
         this.carsShopFacade = carsShopFacade;
     }
 
     @Override
-    public List<CarReport> addCar(String fileName) {
+    public List<CarReport> addCars(String fileName) {
         return readCarDetailsFromFile(fileName).stream()
                 .map(carsShopFacade::getCarReport)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public DealInfo createDeal(Long id, int price, Customer customer) {
+        return carsShopFacade.createDeal(customer,price,id);
+    }
+
+    @Override
+    public DealInfo findTheBestDeal(Long id) {
+        return carsShopFacade.findTheBestDeal(id);
+    }
+
+    @Override
+    public boolean acceptDeal(long id) {
+        return carsShopFacade.acceptDeal(id);
+    }
+
+    @Override
+    public void rejectDeal(long id) {
+        carsShopFacade.rejectDeal(id);
     }
 
     private List<CarSaleDetails> readCarDetailsFromFile(String fileName) {

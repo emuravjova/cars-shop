@@ -13,6 +13,12 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Customer {
+    @NotEmpty
+    @NotNull
+    @ApiModelProperty(notes = "Customer name", required = true, example = "Den")
     String name;
+    @NotEmpty
+    @NotNull
+    @ApiModelProperty(notes = "Customer contacts", required = true, example = "0967894512")
     String contacts;
 }
