@@ -11,18 +11,17 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import static springfox.documentation.builders.PathSelectors.regex;
-
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
     @Bean
     public Docket productApi() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .globalResponseMessage(RequestMethod.POST, ImmutableList.of(new ResponseMessage(200, "OK",null, null, null)))
+                .globalResponseMessage(RequestMethod.POST, ImmutableList.of(new ResponseMessage(200, "OK", null, null, null)))
+                .globalResponseMessage(RequestMethod.GET, ImmutableList.of(new ResponseMessage(200, "OK", null, null, null)))
+                .globalResponseMessage(RequestMethod.PUT, ImmutableList.of(new ResponseMessage(200, "OK", null, null, null)))
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.playtika.automation.feign.carsshop.web"))
-//                .paths(regex("/cars"))
                 .build()
                 .apiInfo(metaData());
     }

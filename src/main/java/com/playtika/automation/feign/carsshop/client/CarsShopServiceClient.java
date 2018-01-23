@@ -22,17 +22,17 @@ public interface CarsShopServiceClient {
                               @RequestParam("contacts") String contacts);
 
     @PostMapping("/deal")
-    DealInfo createDeal (
+    DealInfo createDeal(
             @RequestBody Customer customer,
             @RequestParam("price") int price,
             @RequestParam("carId") Long id);
 
     @GetMapping("/offer/{id}")
-    DealInfo findTheBestDeal (@PathVariable("id") long id);
+    DealInfo findTheBestDeal(@PathVariable("id") long id);
 
     @PutMapping("/acceptDeal/{id}")
-    ResponseEntity<Void> acceptDeal (@PathVariable("id") long id);
+    ResponseEntity<Void> acceptDeal(@PathVariable("id") long id);
 
     @PutMapping(value = "/rejectDeal/{id}")
-    void rejectDeal (@PathVariable("id") long id);
+    void rejectDeal(@PathVariable("id") long id);
 }

@@ -1,7 +1,7 @@
 package com.playtika.automation.feign.carsshop.web;
 
 import com.playtika.automation.feign.carsshop.exception.CarOnSaleNotFoundException;
-import com.playtika.automation.feign.carsshop.exception.InvalidFileContent;
+import com.playtika.automation.feign.carsshop.exception.InvalidFileContentException;
 import com.playtika.automation.feign.carsshop.exception.InvalidFileException;
 import com.playtika.automation.feign.carsshop.exception.NoBestDealFoundException;
 import com.playtika.automation.feign.carsshop.exception.NotAllRequiredParametersReceivedException;
@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @Slf4j
-@Api(description="Add cars to Car store")
+@Api(description = "Add cars to Car store")
 public class CarsShopController {
 
     @Autowired
@@ -38,10 +38,10 @@ public class CarsShopController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Car report returns"),
             @ApiResponse(code = 400, message = "Invalid file or file content")})
-    @PostMapping(value = "/cars",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/cars", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CarReport> addCars(
             @ApiParam(name = "Path to file", required = true)
-            @RequestBody String fileName){
+            @RequestBody String fileName) {
         return carService.addCars(fileName);
     }
 
@@ -50,12 +50,12 @@ public class CarsShopController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Deal with an ID was successfully created"),
             @ApiResponse(code = 404, message = "Such car is not on sale or no such car at all")})
-    public DealInfo createDeal (
+    public DealInfo createDeal(
             @Valid @RequestBody Customer customer,
             @ApiParam(name = "price", required = true, defaultValue = "20000")
             @NotEmpty @RequestParam("price") int price,
             @ApiParam(name = "carId", required = true, defaultValue = "1")
-            @NotEmpty @RequestParam("carId") Long id){
+            @NotEmpty @RequestParam("carId") Long id) {
         return carService.createDeal(id, price, customer);
     }
 
@@ -64,7 +64,7 @@ public class CarsShopController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The best deal is successfully found for offer"),
             @ApiResponse(code = 404, message = "No best deal found for open offer")})
-    public DealInfo findTheBestDeal (@PathVariable("id") long id){
+    public DealInfo findTheBestDeal(@PathVariable("id") long id) {
         return carService.findTheBestDeal(id);
     }
 
@@ -73,7 +73,7 @@ public class CarsShopController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The deal is successfully accepted"),
             @ApiResponse(code = 409, message = "Deal cannot be accepted for closed offer")})
-    public ResponseEntity<Void> acceptDeal (@PathVariable("id") long id){
+    public ResponseEntity<Void> acceptDeal(@PathVariable("id") long id) {
         if (carService.acceptDeal(id)) {
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
@@ -85,7 +85,7 @@ public class CarsShopController {
     @ApiOperation(value = "Reject deal")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The deal is successfully rejected")})
-    public void rejectDeal (@PathVariable("id") long id) {
+    public void rejectDeal(@PathVariable("id") long id) {
         carService.rejectDeal(id);
     }
 
@@ -98,7 +98,7 @@ public class CarsShopController {
 
     @ExceptionHandler
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public String handleInvalidFileContent(InvalidFileContent e) {
+    public String handleInvalidFileContent(InvalidFileContentException e) {
         log.error("Error while file content handling", e);
         return e.getMessage();
     }

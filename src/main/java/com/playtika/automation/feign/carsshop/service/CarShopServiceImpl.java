@@ -1,6 +1,6 @@
 package com.playtika.automation.feign.carsshop.service;
 
-import com.playtika.automation.feign.carsshop.exception.InvalidFileContent;
+import com.playtika.automation.feign.carsshop.exception.InvalidFileContentException;
 import com.playtika.automation.feign.carsshop.exception.InvalidFileException;
 import com.playtika.automation.feign.carsshop.facade.CarShopFacade;
 import com.playtika.automation.feign.carsshop.model.*;
@@ -35,7 +35,7 @@ public class CarShopServiceImpl implements CarShopService {
 
     @Override
     public DealInfo createDeal(Long id, int price, Customer customer) {
-        return carsShopFacade.createDeal(customer,price,id);
+        return carsShopFacade.createDeal(customer, price, id);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CarShopServiceImpl implements CarShopService {
     private CarSaleDetails mapToCarSaleDetails(String line) {
         String[] p = line.split(SEPARATOR);
         if (p.length < 6) {
-            throw new InvalidFileContent("Incorrect file content in line: " + line);
+            throw new InvalidFileContentException("Incorrect file content in line: " + line);
         }
         Car car = getCar(p);
         SaleInfo saleInfo = getSaleInfo(p);

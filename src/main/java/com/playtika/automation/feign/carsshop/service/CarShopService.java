@@ -8,8 +8,12 @@ import java.util.List;
 
 public interface CarShopService {
     List<CarReport> addCars(String fileName);
+
     DealInfo createDeal(Long id, int price, Customer customer);
+
     DealInfo findTheBestDeal(Long id);
+
     boolean acceptDeal(long id);
+
     void rejectDeal(long id);
 }

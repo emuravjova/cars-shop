@@ -1,7 +1,7 @@
 package com.playtika.automation.feign.carsshop.service;
 
 import com.playtika.automation.feign.carsshop.exception.CarOnSaleNotFoundException;
-import com.playtika.automation.feign.carsshop.exception.InvalidFileContent;
+import com.playtika.automation.feign.carsshop.exception.InvalidFileContentException;
 import com.playtika.automation.feign.carsshop.exception.InvalidFileException;
 import com.playtika.automation.feign.carsshop.exception.NoBestDealFoundException;
 import com.playtika.automation.feign.carsshop.exception.NotAllRequiredParametersReceivedException;
@@ -45,19 +45,19 @@ public class CarShopServiceImplTest {
     }
 
     @Test
-    public void shouldReturnEmptyResultWhenFileIsEmpty(){
+    public void shouldReturnEmptyResultWhenFileIsEmpty() {
         assertThat(service.addCars("src/test/resources/files/empty.csv"), empty());
         verify(carShopFacade, never()).getCarReport(Matchers.any(CarSaleDetails.class));
     }
 
-    @Test(expected = InvalidFileContent.class)
+    @Test(expected = InvalidFileContentException.class)
     public void shouldReturnExceptionWhenDataIsCorruptedInFile() {
         service.addCars("src/test/resources/files/corrupted.csv");
         verify(carShopFacade, never()).getCarReport(Matchers.any(CarSaleDetails.class));
     }
 
     @Test
-    public void shouldReturnCarReport(){
+    public void shouldReturnCarReport() {
         CarReport expectedReport = generateCarReport();
         List<CarReport> expectedCarReport = Collections.singletonList(expectedReport);
         when(carShopFacade.getCarReport(expectedReport.getCarDetails())).thenReturn(expectedReport);
@@ -66,32 +66,32 @@ public class CarShopServiceImplTest {
     }
 
     @Test
-    public void shouldReturnDealInfoOnDealCreation(){
+    public void shouldReturnDealInfoOnDealCreation() {
         DealInfo dealInfo = new DealInfo(1L, 1L);
-        Customer customer = new Customer("Den","1111");
+        Customer customer = new Customer("Den", "1111");
         when(carShopFacade.createDeal(customer, 10000, 1L))
                 .thenReturn(dealInfo);
         assertThat(service.createDeal(1L, 10000, customer), equalTo(dealInfo));
     }
 
     @Test(expected = CarOnSaleNotFoundException.class)
-    public void shouldThrowExceptionWhenCarNotOnSAleOnDealCreation(){
-        Customer customer = new Customer("Den","1111");
+    public void shouldThrowExceptionWhenCarNotOnSAleOnDealCreation() {
+        Customer customer = new Customer("Den", "1111");
         when(carShopFacade.createDeal(customer, 10000, 1L))
                 .thenThrow(CarOnSaleNotFoundException.class);
         service.createDeal(1L, 10000, customer);
     }
 
     @Test(expected = NotAllRequiredParametersReceivedException.class)
-    public void shouldThrowExceptionWhenNotAllParamsOnDealCreation(){
-        Customer customer = new Customer("Den","1111");
+    public void shouldThrowExceptionWhenNotAllParamsOnDealCreation() {
+        Customer customer = new Customer("Den", "1111");
         when(carShopFacade.createDeal(customer, 10000, 1L))
                 .thenThrow(NotAllRequiredParametersReceivedException.class);
         service.createDeal(1L, 10000, customer);
     }
 
     @Test
-    public void shouldReturnDealInfoWhenBestDealFound(){
+    public void shouldReturnDealInfoWhenBestDealFound() {
         DealInfo dealInfo = new DealInfo(1L, 1L);
         when(carShopFacade.findTheBestDeal(1L))
                 .thenReturn(dealInfo);
@@ -99,34 +99,34 @@ public class CarShopServiceImplTest {
     }
 
     @Test(expected = NoBestDealFoundException.class)
-    public void shouldThrowExceptionWhenNoBestDealFound(){
+    public void shouldThrowExceptionWhenNoBestDealFound() {
         when(carShopFacade.findTheBestDeal(1L))
                 .thenThrow(NoBestDealFoundException.class);
         service.findTheBestDeal(1L);
     }
 
     @Test
-    public void shouldReturnTrueWhenDealAccepted(){
+    public void shouldReturnTrueWhenDealAccepted() {
         when(carShopFacade.acceptDeal(1L)).thenReturn(true);
         assertTrue(service.acceptDeal(1L));
     }
 
     @Test
-    public void shouldReturnFalseWhenDealIsNOtAccepted(){
+    public void shouldReturnFalseWhenDealIsNOtAccepted() {
         when(carShopFacade.acceptDeal(1L)).thenReturn(false);
         assertFalse(service.acceptDeal(1L));
     }
 
     @Test
-    public void shoulDoNotThrowAnyExceptionWhenDealRejected(){
+    public void shoulDoNotThrowAnyExceptionWhenDealRejected() {
         doNothing().when(carShopFacade).rejectDeal(1L);
         service.acceptDeal(1L);
     }
 
     private CarReport generateCarReport() {
-        Car car = new Car("DS123", "BMW",2015, "green");
+        Car car = new Car("DS123", "BMW", 2015, "green");
         SaleInfo carDetails = new SaleInfo(15000, "09689638521");
-        CarSaleDetails carWithDetails = new CarSaleDetails(car,carDetails);
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, carDetails);
         return new CarReport(1L, carWithDetails, ReportStatus.ADDED);
     }
 

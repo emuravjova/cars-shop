@@ -27,7 +27,7 @@ public class CarShopFacade {
 
     public CarReport getCarReport(CarSaleDetails carToAdd) {
         ReportStatus reportStatus;
-        Long id=0L;
+        Long id = 0L;
         Car car = carToAdd.getCar();
         int price = carToAdd.getSaleInfo().getPrice();
         String contacts = carToAdd.getSaleInfo().getContacts();
@@ -68,13 +68,13 @@ public class CarShopFacade {
         return dealInfo;
     }
 
-    public DealInfo findTheBestDeal(Long id){
+    public DealInfo findTheBestDeal(Long id) {
         DealInfo dealInfo;
         try {
             dealInfo = carsShopServiceClient.findTheBestDeal(id);
-        } catch (FeignException e){
+        } catch (FeignException e) {
             int statusCode = e.status();
-            switch (statusCode){
+            switch (statusCode) {
                 case 404:
                     throw new NoBestDealFoundException("No best deal found for open offer");
                 default:
@@ -84,12 +84,12 @@ public class CarShopFacade {
         return dealInfo;
     }
 
-    public boolean acceptDeal(Long id){
+    public boolean acceptDeal(Long id) {
         try {
             carsShopServiceClient.acceptDeal(id);
-        } catch (FeignException e){
+        } catch (FeignException e) {
             int statusCode = e.status();
-            switch (statusCode){
+            switch (statusCode) {
                 case 409:
                     return false;
                 default:
@@ -99,10 +99,10 @@ public class CarShopFacade {
         return true;
     }
 
-    public void rejectDeal(Long id){
+    public void rejectDeal(Long id) {
         try {
             carsShopServiceClient.rejectDeal(id);
-        } catch (FeignException e){
+        } catch (FeignException e) {
             throw new RuntimeException("Unable to reject deal");
         }
     }

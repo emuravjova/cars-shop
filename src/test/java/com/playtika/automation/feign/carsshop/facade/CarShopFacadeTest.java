@@ -7,7 +7,13 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.playtika.automation.feign.carsshop.exception.CarOnSaleNotFoundException;
 import com.playtika.automation.feign.carsshop.exception.NoBestDealFoundException;
 import com.playtika.automation.feign.carsshop.exception.NotAllRequiredParametersReceivedException;
-import com.playtika.automation.feign.carsshop.model.*;
+import com.playtika.automation.feign.carsshop.model.Car;
+import com.playtika.automation.feign.carsshop.model.CarReport;
+import com.playtika.automation.feign.carsshop.model.CarSaleDetails;
+import com.playtika.automation.feign.carsshop.model.Customer;
+import com.playtika.automation.feign.carsshop.model.DealInfo;
+import com.playtika.automation.feign.carsshop.model.ReportStatus;
+import com.playtika.automation.feign.carsshop.model.SaleInfo;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,16 +21,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import wiremock.com.fasterxml.jackson.core.JsonProcessingException;
-import wiremock.com.fasterxml.jackson.databind.ObjectMapper;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by emuravjova on 12/22/2017.
@@ -39,17 +47,10 @@ public class CarShopFacadeTest {
     @Rule
     public WireMockRule wm = new WireMockRule(options().port(8082).notifier(new Slf4jNotifier(true)));
 
-    private final static String NUMBER = "AS123";
-    private final static String BRAND = "BMW";
-    private final static Integer YEAR = 2007;
-    private final static String COLOR = "blue";
-    private final static Integer PRICE = 25000;
-    private final static String CONTACTS = "0982345678";
-
     @Test
     public void shouldReturnReportForAddedCar() throws Exception {
-        Car car = new Car(NUMBER, BRAND, YEAR, COLOR);
-        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(PRICE,CONTACTS));
+        Car car = new Car("AS123", "BMW", 2007, "blue");
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(25000, "0982345678"));
         wm.stubFor(doRequestToAddCar(car)
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -63,8 +64,8 @@ public class CarShopFacadeTest {
 
     @Test
     public void shouldReturnReportForCarThatAlreadyOnSale() throws Exception {
-        Car car = new Car(NUMBER, BRAND, YEAR, COLOR);
-        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(PRICE,CONTACTS));
+        Car car = new Car("AS123", "BMW", 2007, "blue");
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(25000, "0982345678"));
         wm.stubFor(doRequestToAddCar(car)
                 .willReturn(aResponse()
                         .withStatus(500)));
@@ -76,11 +77,11 @@ public class CarShopFacadeTest {
 
     @Test
     public void shouldReturnReportForCarWithMissingDetails() throws Exception {
-        Car car = new Car(NUMBER, null, YEAR, COLOR);
-        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(PRICE,null));
+        Car car = new Car("AS123", "BMW", 2007, "blue");
+        CarSaleDetails carWithDetails = new CarSaleDetails(car, new SaleInfo(25000, null));
         wm.stubFor(post(urlPathEqualTo("/cars"))
-                .withQueryParam("price", WireMock.equalTo(String.valueOf(PRICE)))
-                .withRequestBody(equalToJson(createCarInJson(car.getNumber(),car.getBrand(),car.getYear(),car.getColor())))
+                .withQueryParam("price", WireMock.equalTo(String.valueOf(25000)))
+                .withRequestBody(equalToJson(createCarInJson("AS123", "BMW", 2007, "blue")))
                 .willReturn(aResponse()
                         .withStatus(400)));
 
@@ -92,7 +93,7 @@ public class CarShopFacadeTest {
     @Test
     public void shouldReturnDealInfoOnDealCreation() throws Exception {
         DealInfo dealInfo = new DealInfo(1L, 1L);
-        Customer customer = new Customer("Den","1111");
+        Customer customer = new Customer("Den", "1111");
         wm.stubFor(doRequestToAddDeal(customer)
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -103,16 +104,16 @@ public class CarShopFacadeTest {
 
     @Test(expected = CarOnSaleNotFoundException.class)
     public void shouldThrowExceptionWhenCarNotOnSAleOnDealCreation() throws Exception {
-        Customer customer = new Customer("Den","1111");
+        Customer customer = new Customer("Den", "1111");
         wm.stubFor(doRequestToAddDeal(customer)
                 .willReturn(aResponse()
-                                .withStatus(404)));
+                        .withStatus(404)));
         facade.createDeal(customer, 25000, 1L);
     }
 
     @Test(expected = NotAllRequiredParametersReceivedException.class)
     public void shouldThrowExceptionWhenNotAllParamsOnDealCreation() throws Exception {
-        Customer customer = new Customer("Den","1111");
+        Customer customer = new Customer("Den", "1111");
         wm.stubFor(doRequestToAddDeal(customer)
                 .willReturn(aResponse()
                         .withStatus(400)));
@@ -131,10 +132,10 @@ public class CarShopFacadeTest {
     }
 
     @Test(expected = NoBestDealFoundException.class)
-    public void shouldThrowExceptionWhenNoBestDealFound(){
+    public void shouldThrowExceptionWhenNoBestDealFound() {
         wm.stubFor(get(urlPathEqualTo("/offer/1"))
                 .willReturn(aResponse()
-                                .withStatus(404)));
+                        .withStatus(404)));
         facade.findTheBestDeal(1L);
     }
 
@@ -155,7 +156,7 @@ public class CarShopFacadeTest {
     }
 
     @Test
-    public void shouldDoNotThrowAnyExceptionWhenDealRejected(){
+    public void shouldDoNotThrowAnyExceptionWhenDealRejected() {
         wm.stubFor(put(urlPathEqualTo("/rejectDeal/1"))
                 .willReturn(aResponse()
                         .withStatus(200)));
@@ -164,16 +165,16 @@ public class CarShopFacadeTest {
 
     private MappingBuilder doRequestToAddCar(Car car) throws JsonProcessingException {
         return post(urlPathEqualTo("/cars"))
-                .withQueryParam("price", WireMock.equalTo(String.valueOf(PRICE)))
-                .withQueryParam("contacts", WireMock.equalTo(CONTACTS))
-                .withRequestBody(equalToJson(createCarInJson(car.getNumber(),car.getBrand(),car.getYear(),car.getColor())));
+                .withQueryParam("price", WireMock.equalTo(String.valueOf(25000)))
+                .withQueryParam("contacts", WireMock.equalTo("0982345678"))
+                .withRequestBody(equalToJson(createCarInJson(car.getNumber(), car.getBrand(), car.getYear(), car.getColor())));
     }
 
     private MappingBuilder doRequestToAddDeal(Customer customer) throws JsonProcessingException {
         return post(urlPathEqualTo("/deal"))
-                .withQueryParam("price", WireMock.equalTo(String.valueOf(PRICE)))
+                .withQueryParam("price", WireMock.equalTo(String.valueOf(25000)))
                 .withQueryParam("carId", WireMock.equalTo(String.valueOf(1L)))
-                .withRequestBody(equalToJson(createCustomerInJson(customer.getName(),customer.getContacts())));
+                .withRequestBody(equalToJson(createCustomerInJson(customer.getName(), customer.getContacts())));
     }
 
     private static String createCustomerInJson(String name, String contacts) {
